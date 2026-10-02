@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules
+dist
+
+# Python
+__pycache__
+.venv
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/settings.json
+
+# Temporary Uploads
+uploads_temp
