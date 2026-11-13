@@ -24,9 +24,9 @@
           </div>
           <div class="portrait-carousel" aria-label="Portrait photos of Maqsood Alam" @mouseenter="pauseCarousel" @mouseleave="resumeCarousel" @focusin="pauseCarousel" @focusout="resumeCarousel">
             <div class="portrait-frame">
-              <img v-if="portraitAvailable[activePortrait]" :src="assetUrl(portraits[activePortrait].src)" :alt="portraits[activePortrait].alt" @error="portraitAvailable[activePortrait] = false" />
+              <img v-if="currentPortraitAvailable" :src="assetUrl(currentPortrait.src)" :alt="currentPortrait.alt" @error="markPortraitUnavailable" />
               <div v-else class="portrait-placeholder"><span class="portrait-monogram">MA</span><strong>Add Maqsood Alam’s photos here</strong><small>Place 3–4 images in<br />public/assets/images/portraits/</small></div>
-              <div class="portrait-caption"><span>{{ portraits[activePortrait].caption }}</span></div>
+              <div class="portrait-caption"><span>{{ currentPortrait.caption }}</span></div>
             </div>
             <div class="carousel-controls" aria-label="Portrait carousel controls">
               <button type="button" aria-label="Previous photo" @click="showPortrait(activePortrait - 1)">‹</button>
@@ -65,13 +65,20 @@ const targetLanguage = ref('')
 const selectedLanguage = ref('')
 const activePortrait = ref(0)
 const carouselPaused = ref(false)
-const portraitAvailable = ref([true, true, true])
 const portraits = [
   { src: 'assets/images/portraits/pm.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Maqsood Alam · Translator & Typist' },
   { src: 'assets/images/portraits/IMG-20250807-WA0012.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Personal service · 25+ years of experience' },
   { src: 'assets/images/portraits/file_00000000595c8211a5b4f148046bdf4f.png', alt: 'Maqsood Alam', caption: 'Legal translation & documentation' },
 ]
 const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`
+const currentPortrait = computed(() => portraits[activePortrait.value] ?? portraits[0]!)
+const unavailablePortraits = ref<number[]>([])
+const currentPortraitAvailable = computed(() => !unavailablePortraits.value.includes(activePortrait.value))
+const markPortraitUnavailable = () => {
+  if (!unavailablePortraits.value.includes(activePortrait.value)) {
+    unavailablePortraits.value.push(activePortrait.value)
+  }
+}
 let carouselTimer: ReturnType<typeof setInterval> | undefined
 const showPortrait = (index: number) => { activePortrait.value = (index + portraits.length) % portraits.length }
 const pauseCarousel = () => { carouselPaused.value = true }
