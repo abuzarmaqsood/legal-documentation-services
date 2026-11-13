@@ -2,29 +2,29 @@
   <div class="site-shell">
     <header class="site-header">
       <nav class="navigation wrap" aria-label="Main navigation">
-        <a class="brand" href="#home" aria-label="Legal Documentation Services home"><img class="brand-logo" src="/assets/images/cover/LDS_logo2.png" alt="" aria-hidden="true" /><span>Legal Documentation <small>Services</small></span></a>
+        <a class="brand" href="#home" aria-label="Legal Documentation Services home"><img class="brand-logo" :src="assetUrl('assets/images/cover/LDS_logo2.png')" alt="" aria-hidden="true" /><span>Legal Documentation <small>Services</small></span></a>
         <button class="menu-toggle" :aria-expanded="menuOpen" aria-label="Toggle menu" @click="menuOpen = !menuOpen">☰</button>
         <div class="nav-links" :class="{ 'is-open': menuOpen }">
           <a href="#about" @click="menuOpen = false">About Us</a><a href="#services" @click="menuOpen = false">Services</a><a href="#process" @click="menuOpen = false">Our Process</a><a href="#contact" @click="menuOpen = false">Contact</a>
-          <a class="nav-cta" :href="whatsappLink" target="_blank" rel="noopener" @click="menuOpen = false">Request a Quote</a>
+          <a class="nav-cta" :href="quoteLink" target="_blank" rel="noopener" @click="menuOpen = false">Request a Quote</a>
         </div>
       </nav>
     </header>
 
     <main id="home">
-      <section class="hero">
+      <section class="hero" :style="{ backgroundImage: `url('${assetUrl('assets/images/cover/cover-bg.avif')}')` }">
         <div class="hero-shade"></div>
         <div class="wrap hero-layout">
           <div class="hero-content">
           <p class="eyebrow">Personal service · 25+ years of experience</p>
           <h1>Professional Typing, Translation &amp; Court Documentation</h1>
           <p class="hero-lead">Accurate typing, translation, audio transcription and document preparation for individuals, advocates and legal professionals.</p>
-          <div class="hero-actions"><a class="button button-gold" :href="whatsappLink" target="_blank" rel="noopener">Request a Quote <span>→</span></a><a class="button button-outline" href="#services">Explore Services</a></div>
-          <div class="hero-note"><span class="seal">✦</span><span><strong>English · Hindi · Urdu · Bengali · Punjabi · Marathi · Arabic</strong><small>Support for all courts and legal matters</small></span></div>
+          <div class="hero-actions"><a class="button button-gold" :href="quoteLink" target="_blank" rel="noopener">Request a Quote <span>→</span></a><a class="button button-outline" href="#services">Explore Services</a></div>
+          <div class="hero-note"><span class="seal">✦</span><span><strong>English · Hindi · Urdu · Gujarati · Punjabi · Marathi · Arabic</strong><small>Support for all courts and legal matters</small></span></div>
           </div>
           <div class="portrait-carousel" aria-label="Portrait photos of Maqsood Alam" @mouseenter="pauseCarousel" @mouseleave="resumeCarousel" @focusin="pauseCarousel" @focusout="resumeCarousel">
             <div class="portrait-frame">
-              <img v-if="portraitAvailable[activePortrait]" :src="portraits[activePortrait].src" :alt="portraits[activePortrait].alt" @error="portraitAvailable[activePortrait] = false" />
+              <img v-if="portraitAvailable[activePortrait]" :src="assetUrl(portraits[activePortrait].src)" :alt="portraits[activePortrait].alt" @error="portraitAvailable[activePortrait] = false" />
               <div v-else class="portrait-placeholder"><span class="portrait-monogram">MA</span><strong>Add Maqsood Alam’s photos here</strong><small>Place 3–4 images in<br />public/assets/images/portraits/</small></div>
               <div class="portrait-caption"><span>{{ portraits[activePortrait].caption }}</span></div>
             </div>
@@ -42,31 +42,36 @@
         <div class="section-kicker">About Us</div><div class="about-grid"><div><h2>25+ Years of Experience. Personal Service. Careful Work.</h2><div class="gold-rule"></div></div><div class="body-copy"><p>Legal Documentation Services provides professional <strong>translation, typing, audio transcription and documentation</strong> support for people who need their legal papers prepared with care. The work is handled personally by an experienced freelance legal translator and typist.</p><p>From affidavits and petitions to judgments, agreements and certificates, each assignment is approached with attention to the source document, requested language and intended use. We work with individuals, advocates, law firms and other clients across court matters.</p><p class="accent-copy">Clear communication. Careful work. Personal attention from first enquiry to delivery.</p></div></div>
       </section>
 
-      <section id="services" class="section services-section"><div class="wrap"><div class="section-heading"><div class="section-kicker">What We Do</div><h2>Our Core Services</h2><p>Practical documentation support for legal and official requirements.</p></div><div class="service-grid"><article v-for="service in services" :key="service.title" class="service-card"><span class="service-number">{{ service.number }}</span><h3>{{ service.title }}</h3><p>{{ service.description }}</p></article></div></div></section>
+      <section id="services" class="section services-section"><div class="wrap"><div class="section-heading"><div class="section-kicker">What We Do</div><h2>Our Core Services</h2><p>Practical documentation support for legal and official requirements. Select a service to include it in your quote request.</p></div><div class="service-grid"><article v-for="service in services" :key="service.title" class="service-card selectable-card" :class="{ 'is-selected': selectedService === service.title }" role="button" tabindex="0" :aria-pressed="selectedService === service.title" @click="chooseService(service.title)" @keydown.enter.prevent="chooseService(service.title)" @keydown.space.prevent="chooseService(service.title)"><span class="service-number">{{ service.number }}</span><h3>{{ service.title }}</h3><p>{{ service.description }}</p></article></div></div></section>
 
-      <section id="languages" class="section languages-section"><div class="wrap"><div class="section-heading"><div class="section-kicker">Languages Supported</div><h2>Work across different languages</h2><p>Clear, accurate translations in the most requested legal languages.</p></div><div class="language-grid"><article v-for="language in languages" :key="language.code" class="language-card"><span>{{ language.code }}</span><h3>{{ language.name }}</h3></article></div></div></section>
+      <section id="languages" class="section languages-section"><div class="wrap"><div class="section-heading"><div class="section-kicker">Languages Supported</div><h2>Work across different languages</h2><p>{{ selectedService === 'Legal Translation' ? 'Select two languages for translation. The first is the source and the second is the target.' : selectedService ? 'Select a language to include it in your quote request.' : 'Choose a service above first, then select your language here.' }}</p></div><div class="language-grid"><div v-for="language in languages" :key="language.code" class="language-option"><article class="language-card selectable-card" :class="{ 'is-selected': isLanguageSelected(language.name), 'is-interactive': !!selectedService }" :role="selectedService ? 'button' : undefined" :tabindex="selectedService ? 0 : undefined" :aria-pressed="selectedService ? isLanguageSelected(language.name) : undefined" @click="selectedService && chooseLanguage(language.name)" @keydown.enter.prevent="selectedService && chooseLanguage(language.name)" @keydown.space.prevent="selectedService && chooseLanguage(language.name)"><span>{{ language.code }}</span><h3>{{ language.name }}</h3></article><span v-if="languageSelectionLabel(language.name)" class="language-direction">{{ languageSelectionLabel(language.name) }}</span></div></div></div></section>
 
       <section id="process" class="section process-section wrap"><div class="process-intro"><div class="section-kicker">Simple &amp; Personal</div><h2>Our Working Process</h2><p>Every request is handled directly, with clear communication at each step.</p><a class="text-link" :href="whatsappLink" target="_blank" rel="noopener">Talk about your document <span>→</span></a></div><ol class="process-list"><li v-for="(step, index) in process" :key="step"><span>0{{ index + 1 }}</span><p>{{ step }}</p></li></ol></section>
 
       <section id="contact" class="contact-section"><div class="wrap contact-inner"><div><div class="section-kicker">Get in Touch</div><h2>Tell us what you need.</h2><p>Share the document type and language pair to request a quotation. We’ll get back to you personally.</p></div><div class="contact-actions"><a class="button button-gold" :href="whatsappLink" target="_blank" rel="noopener">Chat on WhatsApp <span>→</span></a><a class="contact-detail" href="tel:+919582269045"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h3l2 5-2 1.5a15 15 0 0 0 5.5 5.5L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></svg><span><small>Call</small>+91 95822 69045</span></a><a class="contact-detail" href="mailto:maqsoodalam1965@gmail.com"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><span><small>Email</small>maqsoodalam1965@gmail.com</span></a></div></div></section>
     </main>
 
-    <footer class="site-footer"><div class="wrap footer-main"><a class="brand footer-brand" href="#home"><img class="brand-logo" src="/assets/images/cover/LDS_log_new.jpeg" alt="" aria-hidden="true" /><span style="margin-left: -14px;">Legal Documentation <small>Services</small></span></a><p>Professional Typing, Translation &amp; Court Documentation</p><div class="footer-links"><a href="#about">About</a><a href="#services">Services</a><a href="#contact">Contact</a></div></div><div class="wrap footer-notice"><p>Legal Documentation Services provides translation, typing, audio transcription and document preparation support. We do not provide legal advice, represent clients in court, or replace the services of a licensed advocate.</p><small>© {{ year }} Legal Documentation Services</small></div></footer>
+    <footer class="site-footer"><div class="wrap footer-main"><a class="brand footer-brand" href="#home"><img class="brand-logo" :src="assetUrl('assets/images/cover/LDS_log_new.jpeg')" alt="" aria-hidden="true" /><span style="margin-left: -14px;">Legal Documentation <small>Services</small></span></a><p>Professional Typing, Translation &amp; Court Documentation</p><div class="footer-links"><a href="#about">About</a><a href="#services">Services</a><a href="#contact">Contact</a></div></div><div class="wrap footer-notice"><p>Legal Documentation Services provides translation, typing, audio transcription and document preparation support. We do not provide legal advice, represent clients in court, or replace the services of a licensed advocate.</p><small>© {{ year }} Legal Documentation Services</small></div></footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 const menuOpen = ref(false)
+const selectedService = ref('')
+const sourceLanguage = ref('')
+const targetLanguage = ref('')
+const selectedLanguage = ref('')
 const activePortrait = ref(0)
 const carouselPaused = ref(false)
 const portraitAvailable = ref([true, true, true])
 const portraits = [
-  { src: '/assets/images/portraits/pm.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Maqsood Alam · Translator & Typist' },
-  { src: '/assets/images/portraits/IMG-20250807-WA0012.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Personal service · 25+ years of experience' },
-  { src: '/assets/images/portraits/file_00000000595c8211a5b4f148046bdf4f.png', alt: 'Maqsood Alam', caption: 'Legal translation & documentation' },
+  { src: 'assets/images/portraits/pm.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Maqsood Alam · Translator & Typist' },
+  { src: 'assets/images/portraits/IMG-20250807-WA0012.jpg.jpeg', alt: 'Maqsood Alam', caption: 'Personal service · 25+ years of experience' },
+  { src: 'assets/images/portraits/file_00000000595c8211a5b4f148046bdf4f.png', alt: 'Maqsood Alam', caption: 'Legal translation & documentation' },
 ]
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`
 let carouselTimer: ReturnType<typeof setInterval> | undefined
 const showPortrait = (index: number) => { activePortrait.value = (index + portraits.length) % portraits.length }
 const pauseCarousel = () => { carouselPaused.value = true }
@@ -88,12 +93,74 @@ const languages = [
   { code: 'EN', name: 'English' },
   { code: 'HI', name: 'Hindi' },
   { code: 'UR', name: 'Urdu' },
-  { code: 'BN', name: 'Bengali' },
+  { code: 'GU', name: 'Gujarati' },
   { code: 'PU', name: 'Punjabi' },
   { code: 'MA', name: 'Marathi' },
   { code: 'AR', name: 'Arabic' },
 ]
+const chooseService = (service: string) => {
+  selectedService.value = selectedService.value === service ? '' : service
+  sourceLanguage.value = ''
+  targetLanguage.value = ''
+  selectedLanguage.value = ''
+}
+const chooseLanguage = (language: string) => {
+  if (!selectedService.value) return
+
+  if (selectedService.value !== 'Legal Translation') {
+    selectedLanguage.value = selectedLanguage.value === language ? '' : language
+    return
+  }
+
+  if (sourceLanguage.value === language) {
+    sourceLanguage.value = ''
+    targetLanguage.value = ''
+  } else if (targetLanguage.value === language) {
+    targetLanguage.value = ''
+  } else if (!sourceLanguage.value) {
+    sourceLanguage.value = language
+  } else if (!targetLanguage.value) {
+    targetLanguage.value = language
+  } else {
+    sourceLanguage.value = language
+    targetLanguage.value = ''
+  }
+}
+const isLanguageSelected = (language: string) => selectedService.value === 'Legal Translation'
+  ? sourceLanguage.value === language || targetLanguage.value === language
+  : selectedLanguage.value === language
+const languageSelectionLabel = (language: string) => {
+  if (selectedService.value === 'Legal Translation') {
+    if (sourceLanguage.value === language) return 'From'
+    if (targetLanguage.value === language) return 'To'
+  } else if (selectedLanguage.value === language) {
+    return ''
+  }
+  return ''
+}
 const process = ['Tell us about your document and the language pair.', 'Share the document securely by email or WhatsApp.', 'Receive a quotation and agree on the scope and timing.', 'Work is prepared and delivered in the agreed format.']
+const quoteLink = computed(() => {
+  const messageParts = ['Hello, I would like to request a quotation.']
+
+  if (!selectedService.value) {
+    messageParts.push('I have not selected a service or language yet. Please help me choose the right service.')
+  } else {
+    messageParts.push(`Service: ${selectedService.value}.`)
+
+    if (selectedService.value === 'Legal Translation') {
+      if (sourceLanguage.value && targetLanguage.value) {
+        messageParts.push(`Translation: ${sourceLanguage.value} to ${targetLanguage.value}.`)
+      } else {
+        const chosenLanguages = [sourceLanguage.value, targetLanguage.value].filter(Boolean)
+        if (chosenLanguages.length) messageParts.push(`Language selected: ${chosenLanguages.join(', ')}.`)
+      }
+    } else if (selectedLanguage.value) {
+      messageParts.push(`Language: ${selectedLanguage.value}.`)
+    }
+  }
+
+  return `https://wa.me/919582269045?text=${encodeURIComponent(messageParts.join(' '))}`
+})
 </script>
 
 <style>
@@ -101,7 +168,19 @@ const process = ['Tell us about your document and the language pair.', 'Share th
 :root{font-family:'DM Sans',Arial,sans-serif;color:#26313b;background:#fff;font-synthesis:none;text-rendering:optimizeLegibility;--navy:#172b40;--navy-deep:#102235;--gold:#bd9456;--muted:#697680;--line:#e3e7e9;--paper:#f6f7f5}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:84px}body{margin:0;min-width:320px}.wrap{width:min(1120px,calc(100% - 48px));margin-inline:auto}.site-shell > .site-header{position:sticky;top:0;z-index:20;background:#fff;box-shadow:0 4px 16px rgba(16,35,53,.10)}.topline{background:var(--navy-deep);color:#e9edf0;font-size:12px;letter-spacing:.02em}.topline-inner{min-height:36px;display:flex;align-items:center;justify-content:space-between}.topline a{color:#fff;text-decoration:none}.navigation{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:28px}.brand{display:flex;align-items:center;gap:11px;color:var(--navy);font-family:'Playfair Display',Georgia,serif;font-size:15px;font-weight:600;text-decoration:none;line-height:1.1}.brand small{display:block;margin-top:5px;font:500 10px 'DM Sans',sans-serif;letter-spacing:.21em;text-transform:uppercase;color:var(--muted)}.brand-logo{width:65px;height:38px;object-fit:contain;flex:none}.nav-links{display:flex;align-items:center;gap:28px}.nav-links>a{color:#35424c;font-size:13px;text-decoration:none}.nav-links>a:hover,.footer-links a:hover{color:var(--gold)}.nav-links .nav-cta{padding:12px 18px;background:var(--navy);color:#fff}.menu-toggle{display:none}.hero{position:relative;min-height:500px;display:flex;align-items:center;background:#192d41 url('/assets/images/cover/cover-bg.avif') center 48%/cover no-repeat;color:#fff}.hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,31,48,.94) 0%,rgba(16,37,56,.78) 49%,rgba(16,37,56,.18) 100%)}.hero-content{position:relative;padding-block:66px}.eyebrow,.section-kicker{margin:0 0 16px;color:var(--gold);font-size:11px;font-weight:700;letter-spacing:.19em;text-transform:uppercase}.hero h1,.section h2,.contact-section h2{font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacing:-.025em}.hero h1{font-size:clamp(36px,5vw,57px);line-height:1.14;max-width:730px;margin:0 0 18px}.hero-lead{max-width:600px;color:#e1e5e8;font-size:16px;line-height:1.8;margin:0}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:18px;padding:0 20px;font-size:13px;font-weight:700;text-decoration:none;transition:background .2s,color .2s}.button span{font-size:17px}.button-gold{background:var(--gold);color:#15283a}.button-gold:hover{background:#d1ad73}.button-outline{border:1px solid rgba(255,255,255,.6);color:#fff}.button-outline:hover{background:#fff;color:var(--navy)}.hero-note{display:flex;align-items:center;gap:13px;margin-top:38px}.seal{width:38px;height:38px;border:1px solid rgba(189,148,86,.8);border-radius:50%;display:grid;place-items:center;color:var(--gold)}.hero-note strong,.hero-note small{display:block}.hero-note strong{font-size:12px;letter-spacing:.08em}.hero-note small{margin-top:4px;color:#cbd3d9;font-size:11px}.trust-strip{border-bottom:1px solid var(--line);background:#fff}.trust-items{min-height:92px;display:flex;align-items:center;justify-content:space-between;gap:20px}.trust-items>div{display:flex;align-items:center;gap:10px}.trust-items strong{font:600 17px 'Playfair Display',Georgia,serif;color:var(--navy)}.trust-items span{font-size:11px;color:var(--muted)}.trust-items i{height:30px;width:1px;background:var(--line)}.section{padding-block:82px}.about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:90px}.section h2,.contact-section h2{margin:0;color:var(--navy);font-size:clamp(30px,4vw,42px);line-height:1.23}.gold-rule{width:56px;height:2px;background:var(--gold);margin-top:22px}.body-copy{max-width:650px;color:#697680;font-size:14px;line-height:1.9}.body-copy p{margin:0 0 15px}.body-copy .accent-copy{color:var(--navy);font-weight:600}.services-section{background:var(--paper)}.section-heading{text-align:center;margin:0 auto 36px}.section-heading .section-kicker{margin-bottom:11px}.section-heading h2{font-size:36px}.section-heading>p{margin:12px 0 0;color:var(--muted);font-size:14px}.service-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);background:#fff}.service-card{min-height:205px;padding:25px 23px;border-right:1px solid var(--line)}.service-card:last-child{border-right:0}.service-number{color:var(--gold);font:600 13px 'Playfair Display',Georgia,serif}.service-card h3,.reason-grid h3{margin:19px 0 9px;color:var(--navy);font:600 18px 'Playfair Display',Georgia,serif}.service-card p,.reason-grid p{margin:0;color:var(--muted);font-size:12px;line-height:1.8}.language-note{text-align:center;margin:24px 0 0;color:var(--muted);font-size:12px}.language-note strong{color:var(--navy)}.reasons-section{background:#fff}.reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:42px;margin-top:42px}.reason-grid article{border-top:1px solid var(--line);padding-top:24px}.reason-icon{color:var(--gold);font:600 22px 'Playfair Display',Georgia,serif}.reason-grid h3{margin:14px 0 8px}.process-section{display:grid;grid-template-columns:.85fr 1.15fr;gap:88px;border-top:1px solid var(--line)}.process-intro>p{max-width:340px;color:var(--muted);font-size:14px;line-height:1.8}.text-link{display:inline-block;margin-top:12px;color:var(--navy);font-size:13px;font-weight:700;text-decoration:none}.text-link span{color:var(--gold);margin-left:8px}.process-list{list-style:none;margin:0;padding:0}.process-list li{display:flex;align-items:center;gap:20px;padding:17px 0;border-bottom:1px solid var(--line)}.process-list li:first-child{border-top:1px solid var(--line)}.process-list li>span{color:var(--gold);font:600 14px 'Playfair Display',Georgia,serif}.process-list p{margin:0;color:#52606b;font-size:13px;line-height:1.6}.contact-section{background:var(--navy);color:#fff;padding:68px 0}.contact-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:70px}.contact-section h2{color:#fff;font-size:38px}.contact-section .section-kicker{color:#d3b581}.contact-inner>div:first-child>p{max-width:440px;color:#cad2d8;font-size:13px;line-height:1.8}.contact-actions{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;align-items:center}.contact-actions .button{grid-column:1/-1;justify-self:start}.contact-detail{color:#fff;font-size:13px;text-decoration:none}.contact-detail small{display:block;margin-bottom:6px;color:#aebbc5;font-size:10px;letter-spacing:.12em;text-transform:uppercase}.site-footer{background:#0d1e2d;color:#d5dce1}.footer-main{min-height:116px;display:flex;align-items:center;justify-content:space-between;gap:25px}.footer-brand{color:#fff}.footer-main>p{color:#aab5bd;font-size:11px}.footer-links{display:flex;gap:20px}.footer-links a{color:#d5dce1;font-size:11px;text-decoration:none}.footer-notice{border-top:1px solid rgba(255,255,255,.12);padding-block:16px 22px;display:flex;justify-content:space-between;gap:24px;align-items:center}.footer-notice p{max-width:760px;margin:0;color:#9eabb4;font-size:10px;line-height:1.7}.footer-notice small{white-space:nowrap;color:#9eabb4;font-size:10px}a:focus-visible,button:focus-visible{outline:3px solid #d6b577;outline-offset:3px}
 @media(max-width:800px){.wrap{width:min(100% - 36px,650px)}.navigation{min-height:68px}.menu-toggle{display:block;border:0;background:none;color:var(--navy);font-size:22px;cursor:pointer}.nav-links{display:none;position:absolute;z-index:5;top:104px;left:0;right:0;padding:18px;background:#fff;border-top:1px solid var(--line);box-shadow:0 12px 20px #10223512;align-items:stretch;gap:0}.nav-links.is-open{display:flex;flex-direction:column}.nav-links>a{padding:13px 4px}.nav-links .nav-cta{margin-top:8px;padding:13px;text-align:center}.hero{min-height:480px;background-position:60% center}.hero-shade{background:linear-gradient(90deg,rgba(13,31,48,.94),rgba(16,37,56,.68))}.trust-items{padding-block:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.trust-items i{display:none}.trust-items>div{gap:8px}.trust-items strong{font-size:15px}.trust-items span{font-size:10px}.section{padding-block:60px}.about-grid,.process-section,.contact-inner{grid-template-columns:1fr;gap:30px}.about-grid{gap:20px}.service-grid{grid-template-columns:1fr 1fr}.service-card{border-bottom:1px solid var(--line)}.service-card:nth-child(2){border-right:0}.service-card:nth-child(3),.service-card:nth-child(4){border-bottom:0}.reason-grid{gap:25px}.footer-main{padding-block:25px;flex-wrap:wrap}.footer-main>p{width:100%;order:3;margin:0}.footer-notice{align-items:flex-start;flex-direction:column;gap:9px}}
 @media(max-width:520px){.topline-inner{min-height:34px;font-size:10px}.topline-inner span{max-width:190px}.navigation{gap:12px}.brand{font-size:13px}.brand-logo{width:34px;height:34px}.nav-links{top:100px}.hero{min-height:465px}.hero-content{padding-block:56px}.hero h1{font-size:37px}.hero-lead{font-size:14px}.hero-actions{gap:9px}.button{padding-inline:14px;font-size:12px}.section-heading h2{font-size:30px}.service-grid{grid-template-columns:1fr}.service-card{min-height:0;padding:22px;border-right:0!important;border-bottom:1px solid var(--line)!important}.service-card:last-child{border-bottom:0!important}.reason-grid{grid-template-columns:1fr;gap:22px;margin-top:28px}.reason-grid article{padding-top:18px}.contact-section{padding:52px 0}.contact-section h2{font-size:32px}.contact-actions{grid-template-columns:1fr}.contact-actions .button{grid-column:auto}.footer-links{gap:14px}.footer-notice p{font-size:9px}}
-.hero{min-height:500px}.hero-layout{position:relative;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);align-items:center;gap:42px}.hero-layout .hero-content{position:relative;padding-block:66px}.hero-layout .hero h1{max-width:660px}.portrait-carousel{width:min(100%,390px);justify-self:end}.portrait-frame{position:relative;aspect-ratio:4/5;overflow:hidden;border-radius:22px;box-shadow:0 22px 50px #08172566}.portrait-frame>img{width:100%;height:100%;display:block;object-fit:cover;border-radius:inherit;mask-image:radial-gradient(ellipse at center, #000 57%, rgb(0 0 0 / 88%) 72%, transparent 100%);animation:portrait-enter .45s ease both}.portrait-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;color:#fff}.portrait-monogram{width:76px;height:76px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:#e1c28e;font:500 28px 'Playfair Display',Georgia,serif}.portrait-placeholder strong{font:500 20px 'Playfair Display',Georgia,serif}.portrait-placeholder small{color:#cad3dc;font-size:11px;line-height:1.7}.portrait-caption{position:absolute;inset:auto 0 0;padding:28px 16px 14px;background:linear-gradient(transparent,#0b1c2be8);color:#fff;font-size:11px;letter-spacing:.04em}.carousel-controls{display:none}.carousel-controls button{color:#fff}.carousel-controls>button:not(.carousel-pause){width:30px;height:30px;border:1px solid #ffffff72;border-radius:50%;background:transparent;font-size:19px;line-height:1;cursor:pointer}.carousel-dots{display:flex;align-items:center;gap:7px}.carousel-dots button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#ffffff70;cursor:pointer}.carousel-dots button.is-active{width:19px;border-radius:5px;background:#d3b581}.carousel-controls .carousel-pause{border:0;background:none;color:#e2e8ed;font-size:10px;cursor:pointer}.portrait-carousel button:focus-visible{outline:2px solid #d6b577;outline-offset:3px}@keyframes portrait-enter{from{opacity:.65;transform:scale(1.015)}to{opacity:1;transform:scale(1)}}
-@media(max-width:800px){.hero-layout{grid-template-columns:minmax(0,1fr) 260px;gap:28px}.portrait-carousel{width:260px}}
-@media(max-width:520px){.hero{min-height:0}.hero-layout{grid-template-columns:1fr;gap:0}.hero-layout .hero-content{padding-block:48px 28px}.portrait-carousel{width:min(100%,260px);justify-self:center;margin:0 auto 38px}.portrait-frame{aspect-ratio:4/3}.portrait-placeholder{gap:9px}.portrait-monogram{width:58px;height:58px;font-size:22px}.portrait-placeholder strong{font-size:17px}}
+.hero{min-height:500px}.hero-layout{position:relative;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);align-items:center;gap:42px}.hero-layout .hero-content{position:relative;padding-block:66px}.hero-layout .hero h1{max-width:660px}.portrait-carousel{width:min(100%,343px);justify-self:end}.portrait-frame{position:relative;aspect-ratio:4/5;overflow:hidden;border-radius:30px;box-shadow:0 26px 65px #08172555}.portrait-frame>img{width:100%;height:100%;display:block;object-fit:cover;border-radius:inherit;mask-image:radial-gradient(ellipse at center, #000 48%, rgb(0 0 0 / 90%) 68%, rgb(0 0 0 / 45%) 84%, transparent 100%);animation:portrait-enter .45s ease both}.portrait-placeholder{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;color:#fff}.portrait-monogram{width:76px;height:76px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:#e1c28e;font:500 28px 'Playfair Display',Georgia,serif}.portrait-placeholder strong{font:500 20px 'Playfair Display',Georgia,serif}.portrait-placeholder small{color:#cad3dc;font-size:11px;line-height:1.7}.portrait-caption{position:absolute;inset:auto 0 0;padding:28px 16px 14px;background:linear-gradient(transparent,#0b1c2be8);color:#fff;font-size:11px;letter-spacing:.04em}.carousel-controls{display:none}.carousel-controls button{color:#fff}.carousel-controls>button:not(.carousel-pause){width:30px;height:30px;border:1px solid #ffffff72;border-radius:50%;background:transparent;font-size:19px;line-height:1;cursor:pointer}.carousel-dots{display:flex;align-items:center;gap:7px}.carousel-dots button{width:7px;height:7px;padding:0;border:0;border-radius:50%;background:#ffffff70;cursor:pointer}.carousel-dots button.is-active{width:19px;border-radius:5px;background:#d3b581}.carousel-controls .carousel-pause{border:0;background:none;color:#e2e8ed;font-size:10px;cursor:pointer}.portrait-carousel button:focus-visible{outline:2px solid #d6b577;outline-offset:3px}@keyframes portrait-enter{from{opacity:.65;transform:scale(1.015)}to{opacity:1;transform:scale(1)}}
+@media(max-width:800px){.hero-layout{grid-template-columns:minmax(0,1fr) 229px;gap:28px}.portrait-carousel{width:229px}}
+@media(max-width:520px){.hero{min-height:0}.hero-layout{grid-template-columns:1fr;gap:0}.hero-layout .hero-content{padding-block:48px 28px}.portrait-carousel{width:min(100%,229px);justify-self:center;margin:0 auto 38px}.portrait-frame{aspect-ratio:4/3}.portrait-placeholder{gap:9px}.portrait-monogram{width:58px;height:58px;font-size:22px}.portrait-placeholder strong{font-size:17px}}
+.selectable-card{position:relative;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s}
+.services-section .selectable-card{border:1px solid #1d416f}
+.services-section .selectable-card.is-selected{transform:translateY(-3px);border:2px solid #e0a500;background:#285486;box-shadow:0 0 0 3px rgb(224 165 0 / 24%),0 16px 32px rgb(16 35 53 / 20%)}
+.languages-section .selectable-card{border:1px solid #1d416f}
+.languages-section .selectable-card.is-selected{transform:translateY(-3px);border:2px solid #e0a500;background:#285486;box-shadow:0 0 0 3px rgb(224 165 0 / 24%),0 16px 32px rgb(16 35 53 / 20%)}
+.selectable-card.is-selected::after{position:absolute;top:9px;right:9px;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:#e0a500;color:#172b40;content:'✓';font-size:12px;font-weight:800}
+.selectable-card:focus-visible{outline:3px solid #e0a500;outline-offset:3px}
+.languages-section .selectable-card{cursor:default}
+.languages-section .selectable-card.is-interactive{cursor:pointer}
+.language-option{min-width:0;text-align:center}
+.language-direction{display:inline-block;margin-top:7px;color:#172b40;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+@media(prefers-reduced-motion:reduce){.selectable-card{transition:none}}
 </style>
